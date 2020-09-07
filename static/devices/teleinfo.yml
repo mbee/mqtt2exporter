@@ -1,0 +1,12 @@
+# teleinfo/PAPP 00300
+devices:
+  - name: teleinfo_intensite_souscrite
+    topic: "teleinfo/ISOUSC"
+  - name: teleinfo_index_base
+    topic: "teleinfo/BASE"
+  - name: teleinfo_intensite_instantanee
+    topic: "teleinfo/IINST"
+  - name: teleinfo_intensite_maximale
+    topic: "teleinfo/IMAX"
+  - name: teleinfo_puissance_apparente
+    topic: "teleinfo/PAPP"

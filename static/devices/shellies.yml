@@ -1,0 +1,9 @@
+# shellies/shellyht-58F1AD/sensor/temperature 29.62
+devices:
+  - name: shellies_ht
+    topic_re: shellies\/shellyht-(?P<device_id>\w+)\/sensor\/(?P<sensor>temperature|humidity|battery)
+    metric:
+      - name: "shelly_ht_%sensor%"
+        labels:
+          - name: device_id
+            value: "%device_id%"

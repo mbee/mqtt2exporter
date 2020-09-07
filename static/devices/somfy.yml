@@ -1,0 +1,9 @@
+# somfy/0x279622/level/set_state 100
+devices:
+  - name: somfy
+    topic_re: somfy\/(?P<device_id>\w+)\/level\/set_state
+    metric:
+      - name: "somfy_level"
+        labels:
+          - name: device_id
+            value: "%device_id%"
