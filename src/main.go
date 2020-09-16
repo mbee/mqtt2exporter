@@ -19,7 +19,7 @@ func main() {
 	if mqttPassword == "" {
 		panic("MQTT_PASSWORD environment variable must be set")
 	}
-	initDevices()
+	initMessages()
 	mqttRun()
 	prometheusRun()
 }

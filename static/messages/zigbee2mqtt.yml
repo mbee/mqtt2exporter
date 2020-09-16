@@ -1,5 +1,5 @@
 # zigbee2mqtt/0x00158d000238927c {"battery":35,"voltage":2855,"temperature":25.96,"humidity":71.95,"pressure":1007,"linkquality":78}
-devices:
+messages:
   - name: zigbee2mqtt
     topic_re: ^zigbee2mqtt\/(?P<device_id>\w+)$
     message_type: json

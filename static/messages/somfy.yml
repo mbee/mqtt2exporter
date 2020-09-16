@@ -1,5 +1,5 @@
 # somfy/0x279622/level/set_state 100
-devices:
+messages:
   - name: somfy
     topic_re: somfy\/(?P<device_id>\w+)\/level\/set_state
     metric:

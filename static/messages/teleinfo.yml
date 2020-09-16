@@ -1,5 +1,5 @@
 # teleinfo/PAPP 00300
-devices:
+messages:
   - name: teleinfo_intensite_souscrite
     topic: "teleinfo/ISOUSC"
   - name: teleinfo_index_base

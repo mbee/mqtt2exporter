@@ -1,5 +1,5 @@
 # shellies/shellyht-58F1AD/sensor/temperature 29.62
-devices:
+messages:
   - name: shellies_ht
     topic_re: shellies\/shellyht-(?P<device_id>\w+)\/sensor\/(?P<sensor>temperature|humidity|battery)
     metric:

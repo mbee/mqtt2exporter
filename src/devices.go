@@ -12,19 +12,26 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type file struct {
-	Devices []Device `yaml:"devices"`
+// YamlFiles contain all yaml files describing the mqtt messages to monitor
+type YamlFiles struct {
+	Messages []Message `yaml:"messages"`
 }
-type Labels struct {
+
+// Label describes the prometheus labels which will appear on prometheus metrics
+type Label struct {
 	Name  string `yaml:"name"`
 	Value string `yaml:"value"`
 }
+
+// Metric describes how to build a prometheus metric from the mqtt
 type Metric struct {
-	Name   string   `yaml:"name"`
-	Value  string   `yaml:"value"`
-	Labels []Labels `yaml:"labels"`
+	Name   string  `yaml:"name"`
+	Value  string  `yaml:"value"`
+	Labels []Label `yaml:"labels"`
 }
-type Device struct {
+
+// Message decypher one or several mqtt messages
+type Message struct {
 	Name            string   `yaml:"name"`
 	MessageType     string   `yaml:"message_type"`
 	TopicRe         string   `yaml:"topic_re"`
@@ -33,34 +40,38 @@ type Device struct {
 	topicCompiledRe *regexp.Regexp
 }
 
-type regexpDenorm map[*regexp.Regexp]Device
-type noregexpDenorm map[string]Device
+var yamlFiles *YamlFiles
+var mqttPerRegexps = map[*regexp.Regexp]Message{}
+var mqttPerName = map[string]Message{}
 
-var devices file
-var regexps = regexpDenorm{}
-var noregexps = noregexpDenorm{}
+func getYamlFiles() *YamlFiles {
+	if yamlFiles == nil {
+		yamlFiles = &YamlFiles{}
+	}
+	return yamlFiles
+}
 
 func addYaml(content []byte) {
-	err := yaml.Unmarshal(content, &devices)
+	err := yaml.Unmarshal(content, getYamlFiles())
 	if err != nil {
 		panic(err)
 	}
-	for _, device := range devices.Devices {
-		if device.Topic != "" {
-			noregexps[device.Topic] = device
+	for _, message := range yamlFiles.Messages {
+		if message.Topic != "" {
+			mqttPerName[message.Topic] = message
 			continue
 		}
-		device.topicCompiledRe, err = regexp.Compile(device.TopicRe)
+		message.topicCompiledRe, err = regexp.Compile(message.TopicRe)
 		if err != nil {
-			log.Printf("Unable to parse regex '%s' for device '%s'", device.TopicRe, device.Name)
+			log.Printf("Unable to parse regex '%s' for message '%s'", message.TopicRe, message.Name)
 			continue
 		}
-		regexps[device.topicCompiledRe] = device
+		mqttPerRegexps[message.topicCompiledRe] = message
 	}
 }
 
-func initDevices() {
-	err := filepath.Walk("static/devices", func(path string, info os.FileInfo, err error) error {
+func initMessages() {
+	err := filepath.Walk("static/messages", func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
@@ -104,23 +115,23 @@ func getValueFromJSONMessage(json, jqpath string) string {
 	return string(value)
 }
 
-func getMetrics(path string, message string) []metricType {
+func getMetrics(mqttTopic string, mqttMessage string) []metricType {
 	result := []metricType{}
 
 	// let's take care of topic with no regexp first
-	for topic, device := range noregexps {
-		if topic == path {
+	for topic, message := range mqttPerName {
+		if topic == mqttTopic {
 			result = append(result, metricType{
-				name:  device.Name,
-				value: message,
+				name:  message.Name,
+				value: mqttMessage,
 			})
 			return result
 		}
 	}
 
 	// then, let's have a look to topic with regexp
-	for re, device := range regexps {
-		match := re.FindStringSubmatch(path)
+	for re, message := range mqttPerRegexps {
+		match := re.FindStringSubmatch(mqttTopic)
 		if match == nil {
 			continue
 		}
@@ -131,11 +142,11 @@ func getMetrics(path string, message string) []metricType {
 				replacement["%"+name+"%"] = match[i]
 			}
 		}
-		for _, metric := range device.Metric {
+		for _, metric := range message.Metric {
 			name := replace(metric.Name, replacement)
-			value := message
-			if device.MessageType == "json" {
-				value = getValueFromJSONMessage(message, metric.Value)
+			value := mqttMessage
+			if message.MessageType == "json" {
+				value = getValueFromJSONMessage(mqttMessage, metric.Value)
 			}
 			labels := []string{}
 			labelValues := []string{}
