@@ -63,7 +63,7 @@ func addYaml(content []byte) {
 		}
 		message.topicCompiledRe, err = regexp.Compile(message.TopicRe)
 		if err != nil {
-			log.Printf("Unable to parse regex '%s' for message '%s'", message.TopicRe, message.Name)
+			log.Printf("Unable to parse regexp '%s' for message '%s'", message.TopicRe, message.Name)
 			continue
 		}
 		mqttPerRegexps[message.topicCompiledRe] = message
@@ -92,6 +92,7 @@ func initMessages() {
 // TODO => cache the result
 func replace(from string, replacement map[string]string) string {
 	result := from
+	// try to speed-up the process if there's nothing to replace
 	if !strings.ContainsRune(result, '%') {
 		return result
 	}
@@ -115,6 +116,10 @@ func getValueFromJSONMessage(json, jqpath string) string {
 	return string(value)
 }
 
+// getMetrics will compare mqttTopic with:
+// - topics from yaml files with no regexp
+// - topics from yaml files with regexp
+// If it founds a topic with no regexp, it does not look for topics with regexp.
 func getMetrics(mqttTopic string, mqttMessage string) []metricType {
 	result := []metricType{}
 
@@ -135,13 +140,14 @@ func getMetrics(mqttTopic string, mqttMessage string) []metricType {
 		if match == nil {
 			continue
 		}
-		// TODO ensure there is no "message" key
+
 		replacement := make(map[string]string)
 		for i, name := range re.SubexpNames() {
 			if i != 0 && name != "" {
 				replacement["%"+name+"%"] = match[i]
 			}
 		}
+
 		for _, metric := range message.Metric {
 			name := replace(metric.Name, replacement)
 			value := mqttMessage
