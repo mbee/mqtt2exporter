@@ -1,4 +1,12 @@
-# zigbee2mqtt/0x00158d000238927c {"battery":35,"voltage":2855,"temperature":25.96,"humidity":71.95,"pressure":1007,"linkquality":78}
+# INPUT:
+#   zigbee2mqtt/0x00158d000238927c {"battery":32,"voltage":2835,"temperature":24.3,"humidity":56.4,"pressure":1005,"linkquality":68}
+# OUTPUT:
+#   zigbee2mqtt_battery{device_id="0x00158d000238927c"} 32
+#   zigbee2mqtt_humidity{device_id="0x00158d000238927c"} 56.4
+#   zigbee2mqtt_linkquality{device_id="0x00158d000238927c"} 68
+#   zigbee2mqtt_pressure{device_id="0x00158d000238927c"} 1005
+#   zigbee2mqtt_temperature{device_id="0x00158d000238927c"} 24.3
+#   zigbee2mqtt_voltage{device_id="0x00158d000238927c"} 2835
 messages:
   - name: zigbee2mqtt
     topic_re: ^zigbee2mqtt\/(?P<device_id>\w+)$
@@ -31,6 +39,12 @@ messages:
             value: "%device_id%"
       - name: zigbee2mqtt_linkquality
         value: ".linkquality"
+        labels:
+          - name: device_id
+            value: "%device_id%"
+      - name: zigbee2mqtt_contact
+        value: ".contact"
+        type: bool
         labels:
           - name: device_id
             value: "%device_id%"

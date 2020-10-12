@@ -1,4 +1,7 @@
-# somfy/0x279622/level/set_state 100
+# INPUT
+#   somfy/0x279622/level/set_state 100
+# OUTPUT
+#   somfy_level{device_id="0x279622"} 100
 messages:
   - name: somfy
     topic_re: somfy\/(?P<device_id>\w+)\/level\/set_state

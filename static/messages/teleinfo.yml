@@ -1,4 +1,7 @@
-# teleinfo/PAPP 00300
+# INPUT
+#   teleinfo/PAPP 00300
+# OUTPUT
+#   teleinfo_puissance_apparente 340
 messages:
   - name: teleinfo_intensite_souscrite
     topic: "teleinfo/ISOUSC"

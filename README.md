@@ -7,3 +7,5 @@ It tries to guess as much as it can the device type, id and data to expose. It c
 Default supported devices are:
 - shellies
 - zigbee2mqtt
+- somfy
+- teleinfo

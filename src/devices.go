@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/savaki/jq"
@@ -27,6 +29,7 @@ type Label struct {
 type Metric struct {
 	Name   string  `yaml:"name"`
 	Value  string  `yaml:"value"`
+	Type   string  `yaml:"type"`
 	Labels []Label `yaml:"labels"`
 }
 
@@ -89,12 +92,13 @@ func initMessages() {
 	}
 }
 
-// TODO => cache the result
+// replace takes a map of replacement string and will look for each of the keys, and replace them with the value.
+// replacement['%toto%']
 func replace(from string, replacement map[string]string) string {
 	result := from
-	// try to speed-up the process if there's nothing to replace
-	if !strings.ContainsRune(result, '%') {
-		return result
+	// speed-up the process if there's nothing to replace
+	if !strings.ContainsRune(from, '%') {
+		return from
 	}
 	for key, value := range replacement {
 		result = strings.ReplaceAll(result, key, value)
@@ -102,27 +106,33 @@ func replace(from string, replacement map[string]string) string {
 	return result
 }
 
-func getValueFromJSONMessage(json, jqpath string) string {
+func getValueFromJSONMessage(json, jqpath, valueType string) (string, error) {
 	op, err := jq.Parse(jqpath)
 	if err != nil {
-		log.Printf("unable to parse the jqpath <%s>: %v\n", jqpath, err)
-		return "0"
+		return "", fmt.Errorf("unable to parse the jqpath <%s>: %v", jqpath, err)
 	}
 	value, err := op.Apply([]byte(json))
 	if err != nil {
-		log.Printf("unable to get the jq path <%s> from message <%s>: %v\n", jqpath, json, err)
-		return "0"
+		return "", fmt.Errorf("unable to get the jq path <%s> from message <%s>: %v", jqpath, json, err)
 	}
-	return string(value)
+	if valueType == "" || valueType == "float64" {
+		_, err := strconv.ParseFloat(string(value), 64)
+		if err != nil {
+			return "", err
+		}
+		return string(value), nil
+	}
+	if valueType == "bool" {
+		if strings.ToLower(string(value)) == "true" {
+			return "1", nil
+		}
+		return "0", nil
+	}
+	return "", fmt.Errorf("unknown valueType %s", valueType)
 }
 
-// getMetrics will compare mqttTopic with:
-// - topics from yaml files with no regexp
-// - topics from yaml files with regexp
-// If it founds a topic with no regexp, it does not look for topics with regexp.
-func getMetrics(mqttTopic string, mqttMessage string) []metricType {
+func getMetricsPerExactName(mqttTopic string, mqttMessage string) []metricType {
 	result := []metricType{}
-
 	// let's take care of topic with no regexp first
 	for topic, message := range mqttPerName {
 		if topic == mqttTopic {
@@ -133,8 +143,11 @@ func getMetrics(mqttTopic string, mqttMessage string) []metricType {
 			return result
 		}
 	}
+	return result
+}
 
-	// then, let's have a look to topic with regexp
+func getMetricsPerRegexp(mqttTopic string, mqttMessage string) []metricType {
+	result := []metricType{}
 	for re, message := range mqttPerRegexps {
 		match := re.FindStringSubmatch(mqttTopic)
 		if match == nil {
@@ -152,7 +165,12 @@ func getMetrics(mqttTopic string, mqttMessage string) []metricType {
 			name := replace(metric.Name, replacement)
 			value := mqttMessage
 			if message.MessageType == "json" {
-				value = getValueFromJSONMessage(mqttMessage, metric.Value)
+				var err error
+				value, err = getValueFromJSONMessage(mqttMessage, metric.Value, metric.Type)
+				if err != nil {
+					log.Println(err)
+					continue
+				}
 			}
 			labels := []string{}
 			labelValues := []string{}
@@ -169,4 +187,19 @@ func getMetrics(mqttTopic string, mqttMessage string) []metricType {
 		}
 	}
 	return result
+}
+
+// getMetrics will compare mqttTopic with:
+// - topics from yaml files with no regexp
+// - topics from yaml files with regexp
+// If it founds a topic with no regexp, it does not look for topics with regexp.
+func getMetrics(mqttTopic string, mqttMessage string) []metricType {
+	// let's take care of topic with no regexp first
+	result := getMetricsPerExactName(mqttTopic, mqttMessage)
+	if len(result) != 0 {
+		return result
+	}
+
+	// then, let's have a look to topic with regexp
+	return getMetricsPerRegexp(mqttTopic, mqttMessage)
 }
