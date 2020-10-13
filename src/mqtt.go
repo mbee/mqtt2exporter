@@ -16,7 +16,7 @@ var f mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 	exposeMetrics(metrics)
 }
 
-func mqttRun() {
+func mqttRun(mqttURL, mqttUser, mqttPassword string) {
 	opts := mqtt.NewClientOptions().AddBroker(mqttURL).SetClientID("mqtt2prometheus")
 	opts.SetKeepAlive(2 * time.Second)
 	opts.SetDefaultPublishHandler(f)

@@ -21,3 +21,6 @@ echo build release/$VERSION/windows/amd64
 mkdir -p release/$VERSION/windows/amd64
 GOOS=windows GOARCH=amd64 go build -o $NAME.exe ./src
 mv $NAME.exe release/$VERSION/windows/amd64
+
+echo tar devices yml files
+(cd static/messages && tar jcf ../../release/$VERSION/messages.tbz2 *yml)

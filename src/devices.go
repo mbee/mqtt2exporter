@@ -73,9 +73,12 @@ func addYaml(content []byte) {
 	}
 }
 
-func initMessages() {
-	err := filepath.Walk("static/messages", func(path string, info os.FileInfo, err error) error {
+func initMessages(devicesFilePath string) {
+	err := filepath.Walk(devicesFilePath, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
+			return nil
+		}
+		if !strings.HasSuffix(strings.ToLower(path), ".yml") {
 			return nil
 		}
 		content, err := ioutil.ReadFile(path)
