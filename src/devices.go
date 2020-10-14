@@ -39,6 +39,7 @@ type Message struct {
 	MessageType     string   `yaml:"message_type"`
 	TopicRe         string   `yaml:"topic_re"`
 	Topic           string   `yaml:"topic"`
+	MetricName      string   `yaml:"metric_name"`
 	Metric          []Metric `yaml:"metric"`
 	topicCompiledRe *regexp.Regexp
 }
@@ -140,8 +141,10 @@ func getMetricsPerExactName(mqttTopic string, mqttMessage string) []metricType {
 	for topic, message := range mqttPerName {
 		if topic == mqttTopic {
 			result = append(result, metricType{
-				name:  message.Name,
-				value: mqttMessage,
+				name:        message.MetricName,
+				value:       mqttMessage,
+				labels:      []string{"device_name"},
+				labelValues: []string{message.Name},
 			})
 			return result
 		}
@@ -175,8 +178,8 @@ func getMetricsPerRegexp(mqttTopic string, mqttMessage string) []metricType {
 					continue
 				}
 			}
-			labels := []string{}
-			labelValues := []string{}
+			labels := []string{"device_name"}
+			labelValues := []string{message.Name}
 			for _, label := range metric.Labels {
 				labels = append(labels, replace(label.Name, replacement))
 				labelValues = append(labelValues, replace(label.Value, replacement))

@@ -48,5 +48,6 @@ func exposeMetrics(metrics []metricType) {
 
 func prometheusRun(prometheusURL, prometheusPath string) {
 	http.Handle(prometheusPath, promhttp.Handler())
+	log.Printf("Listening to http://%s%s", prometheusURL, prometheusPath)
 	http.ListenAndServe(prometheusURL, nil)
 }

@@ -1,48 +1,48 @@
 # INPUT:
 #   zigbee2mqtt/0x00158d000238927c {"battery":32,"voltage":2835,"temperature":24.3,"humidity":56.4,"pressure":1005,"linkquality":68}
 # OUTPUT:
-#   zigbee2mqtt_battery{device_id="0x00158d000238927c"} 32
-#   zigbee2mqtt_humidity{device_id="0x00158d000238927c"} 56.4
-#   zigbee2mqtt_linkquality{device_id="0x00158d000238927c"} 68
-#   zigbee2mqtt_pressure{device_id="0x00158d000238927c"} 1005
-#   zigbee2mqtt_temperature{device_id="0x00158d000238927c"} 24.3
-#   zigbee2mqtt_voltage{device_id="0x00158d000238927c"} 2835
+#   m2e_battery{device_id="0x00158d000238927c", device_name="zigbee2mqtt"} 32
+#   m2e_humidity{device_id="0x00158d000238927c", device_name="zigbee2mqtt"} 56.4
+#   m2e_linkquality{device_id="0x00158d000238927c", device_name="zigbee2mqtt"} 68
+#   m2e_pressure{device_id="0x00158d000238927c", device_name="zigbee2mqtt"} 1005
+#   m2e_temperature{device_id="0x00158d000238927c", device_name="zigbee2mqtt"} 24.3
+#   m2e_voltage{device_id="0x00158d000238927c", device_name="zigbee2mqtt"} 2835
 messages:
   - name: zigbee2mqtt
     topic_re: ^zigbee2mqtt\/(?P<device_id>\w+)$
     message_type: json
     metric:
-      - name: zigbee2mqtt_battery
+      - name: m2e_battery
         value: ".battery"
         labels:
           - name: device_id
             value: "%device_id%"
-      - name: zigbee2mqtt_voltage
+      - name: m2e_voltage
         value: ".voltage"
         labels:
           - name: device_id
             value: "%device_id%"
-      - name: zigbee2mqtt_temperature
+      - name: m2e_temperature
         value: ".temperature"
         labels:
           - name: device_id
             value: "%device_id%"
-      - name: zigbee2mqtt_humidity
+      - name: m2e_humidity
         value: ".humidity"
         labels:
           - name: device_id
             value: "%device_id%"
-      - name: zigbee2mqtt_pressure
+      - name: m2e_pressure
         value: ".pressure"
         labels:
           - name: device_id
             value: "%device_id%"
-      - name: zigbee2mqtt_linkquality
+      - name: m2e_linkquality
         value: ".linkquality"
         labels:
           - name: device_id
             value: "%device_id%"
-      - name: zigbee2mqtt_contact
+      - name: m2e_contact
         value: ".contact"
         type: bool
         labels:

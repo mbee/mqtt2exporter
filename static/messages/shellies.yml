@@ -3,15 +3,15 @@
 #   shellies/shellyht-58EB2D/sensor/humidity 49.5
 #   shellies/shellyht-58EB2D/sensor/battery 87
 # OUTPUT:
-#   shelly_ht_battery{device_id="58EB2D"} 87
-#   shelly_ht_humidity{device_id="58EB2D"} 49.5
-#   shelly_ht_temperature{device_id="58EB2D"} 31.75
+#   m2e_battery{device_id="58EB2D", device_name="shelly_ht"} 87
+#   m2e_humidity{device_id="58EB2D", device_name="shelly_ht"} 49.5
+#   m2e_temperature{device_id="58EB2D", device_name="shelly_ht"} 31.75
 
 messages:
-  - name: shellies_ht
+  - name: shelly_ht
     topic_re: shellies\/shellyht-(?P<device_id>\w+)\/sensor\/(?P<sensor>temperature|humidity|battery)
     metric:
-      - name: "shelly_ht_%sensor%"
+      - name: m2e_"%sensor%"
         labels:
           - name: device_id
             value: "%device_id%"

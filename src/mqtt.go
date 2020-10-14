@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -17,7 +18,7 @@ var f mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 }
 
 func mqttRun(mqttURL, mqttUser, mqttPassword string) {
-	opts := mqtt.NewClientOptions().AddBroker(mqttURL).SetClientID("mqtt2prometheus")
+	opts := mqtt.NewClientOptions().AddBroker(mqttURL).SetClientID("mqtt2prometheus2")
 	opts.SetKeepAlive(2 * time.Second)
 	opts.SetDefaultPublishHandler(f)
 	opts.SetPingTimeout(1 * time.Second)
@@ -27,6 +28,8 @@ func mqttRun(mqttURL, mqttUser, mqttPassword string) {
 	if token := c.Connect(); token.Wait() && token.Error() != nil {
 		panic(token.Error())
 	}
+
+	log.Printf("Connected to %s with user %s", mqttURL, mqttUser)
 
 	if token := c.Subscribe("#", 0, f); token.Wait() && token.Error() != nil {
 		fmt.Println(token.Error())

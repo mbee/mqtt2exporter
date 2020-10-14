@@ -1,12 +1,12 @@
 # INPUT
 #   somfy/0x279622/level/set_state 100
 # OUTPUT
-#   somfy_level{device_id="0x279622"} 100
+#   m2e_level{device_id="0x279622", device_name="somfy"} 100
 messages:
   - name: somfy
     topic_re: somfy\/(?P<device_id>\w+)\/level\/set_state
     metric:
-      - name: "somfy_level"
+      - name: "m2e_level"
         labels:
           - name: device_id
             value: "%device_id%"

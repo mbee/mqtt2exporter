@@ -9,3 +9,5 @@ Default supported devices are:
 - zigbee2mqtt
 - somfy
 - teleinfo
+  
+TODO => handle counter
