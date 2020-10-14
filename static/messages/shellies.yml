@@ -11,7 +11,7 @@ messages:
   - name: shelly_ht
     topic_re: shellies\/shellyht-(?P<device_id>\w+)\/sensor\/(?P<sensor>temperature|humidity|battery)
     metric:
-      - name: m2e_"%sensor%"
+      - name: "m2e_%sensor%"
         labels:
           - name: device_id
             value: "%device_id%"
