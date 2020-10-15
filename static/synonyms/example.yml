@@ -1,0 +1,10 @@
+synonyms:
+  - device_id: 58EB2D
+    device_type: zigbee2mqtt
+    device_name: kitchen
+  - device_id: 0x00158d000238927c
+    device_type: shelly_ht
+    device_name: livingroom
+  - device_id: 0x279621
+    device_type: somfy
+    device_name: livingroom east

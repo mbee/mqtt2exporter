@@ -1,0 +1,20 @@
+# INPUT:
+#   shellies/shellyht-58EB2D/sensor/temperature 31.75
+#   shellies/shellyht-58EB2D/sensor/humidity 49.5
+#   shellies/shellyht-58EB2D/sensor/battery 87
+# OUTPUT:
+#   m2e_battery{device_id="58EB2D", device_type="shelly_ht"} 87
+#   m2e_battery_last_seconds{device_id="58EB2D", device_type="shelly_ht"} 1.6006711593525043e+09
+#   m2e_humidity{device_id="58EB2D", device_type="shelly_ht"} 49.5
+#   m2e_humidity_last_seconds{device_id="58EB2D", device_type="shelly_ht"} 1.6006711593525043e+09
+#   m2e_temperature{device_id="58EB2D", device_type="shelly_ht"} 31.75
+#   m2e_temperature_last_seconds{device_id="58EB2D", device_type="shelly_ht"} 1.6006711593525043e+09
+
+messages:
+  - type: shelly_ht
+    topic_re: shellies\/shellyht-(?P<device_id>\w+)\/sensor\/(?P<sensor>temperature|humidity|battery)
+    metric:
+      - name: "m2e_%sensor%"
+        labels:
+          - name: device_id
+            value: "%device_id%"

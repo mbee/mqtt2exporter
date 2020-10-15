@@ -1,20 +1,21 @@
 # INPUT
 #   teleinfo/PAPP 00300
 # OUTPUT
-#   m2e_puissance_apparente{device_name="teleinfo_papp"} 340
+#   m2e_puissance_apparente{device_type="teleinfo_papp"} 340
+#   m2e_puissance_apparente_last_seconds{device_type="teleinfo_papp"} 1.6006711593525043e+09
 messages:
-  - name: teleinfo_isousc
+  - type: teleinfo_isousc
     topic: "teleinfo/ISOUSC"
     metric_name: m2e_intensite_souscrite
-  - name: teleinfo_base
+  - type: teleinfo_base
     topic: "teleinfo/BASE"
     metric_name: m2e_index_base
-  - name: teleinfo_iinst
+  - type: teleinfo_iinst
     topic: "teleinfo/IINST"
     metric_name: m2e_intensite_instantanee
-  - name: teleinfo_imax
+  - type: teleinfo_imax
     topic: "teleinfo/IMAX"
     metric_name: m2e_intensite_maximale
-  - name: teleinfo_papp
+  - type: teleinfo_papp
     topic: "teleinfo/PAPP"
     metric_name: m2e_puissance_apparente

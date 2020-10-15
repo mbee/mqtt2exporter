@@ -14,11 +14,12 @@ var f mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 	if len(metrics) == 0 {
 		return
 	}
+	addSynonyms(metrics)
 	exposeMetrics(metrics)
 }
 
-func mqttRun(mqttURL, mqttUser, mqttPassword string) {
-	opts := mqtt.NewClientOptions().AddBroker(mqttURL).SetClientID("mqtt2prometheus")
+func mqttRun(mqttURL, mqttUser, mqttPassword, mqttClientID string) {
+	opts := mqtt.NewClientOptions().AddBroker(mqttURL).SetClientID(mqttClientID)
 	opts.SetKeepAlive(2 * time.Second)
 	opts.SetDefaultPublishHandler(f)
 	opts.SetPingTimeout(1 * time.Second)

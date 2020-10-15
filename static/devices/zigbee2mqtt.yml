@@ -1,14 +1,20 @@
 # INPUT:
 #   zigbee2mqtt/0x00158d000238927c {"battery":32,"voltage":2835,"temperature":24.3,"humidity":56.4,"pressure":1005,"linkquality":68}
 # OUTPUT:
-#   m2e_battery{device_id="0x00158d000238927c", device_name="zigbee2mqtt"} 32
-#   m2e_humidity{device_id="0x00158d000238927c", device_name="zigbee2mqtt"} 56.4
-#   m2e_linkquality{device_id="0x00158d000238927c", device_name="zigbee2mqtt"} 68
-#   m2e_pressure{device_id="0x00158d000238927c", device_name="zigbee2mqtt"} 1005
-#   m2e_temperature{device_id="0x00158d000238927c", device_name="zigbee2mqtt"} 24.3
-#   m2e_voltage{device_id="0x00158d000238927c", device_name="zigbee2mqtt"} 2835
+#   m2e_battery{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 32
+#   m2e_battery_last_seconds{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 1.6006711593525043e+09
+#   m2e_humidity{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 56.4
+#   m2e_humidity_last_seconds{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 1.6006711593525043e+09
+#   m2e_linkquality{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 68
+#   m2e_linkquality_last_seconds{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 1.6006711593525043e+09
+#   m2e_pressure{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 1005
+#   m2e_pressure_last_seconds{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 1.6006711593525043e+09
+#   m2e_temperature{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 24.3
+#   m2e_temperature_last_seconds{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 1.6006711593525043e+09
+#   m2e_voltage{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 2835
+#   m2e_voltage_last_seconds{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 1.6006711593525043e+09
 messages:
-  - name: zigbee2mqtt
+  - type: zigbee2mqtt
     topic_re: ^zigbee2mqtt\/(?P<device_id>\w+)$
     message_type: json
     metric:

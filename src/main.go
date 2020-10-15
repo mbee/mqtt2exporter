@@ -15,6 +15,10 @@ func main() {
 	if mqttPassword == "" {
 		panic("MQTT_PASSWORD environment variable must be set")
 	}
+	mqttClientID := os.Getenv("MQTT_CLIENT_ID")
+	if mqttClientID == "" {
+		mqttClientID = "mqtt2exporter"
+	}
 	prometheusURL := os.Getenv("PROMETHEUS_URL")
 	if prometheusURL == "" {
 		prometheusURL = "0.0.0.0:2121"
@@ -25,9 +29,14 @@ func main() {
 	}
 	devicesFilePath := os.Getenv("DEVICE_PATH")
 	if devicesFilePath == "" {
-		devicesFilePath = "static/messages"
+		devicesFilePath = "static/devices/"
+	}
+	synonymsFilePath := os.Getenv("SYNONYM_PATH")
+	if synonymsFilePath == "" {
+		synonymsFilePath = "static/synonyms/"
 	}
 	initMessages(devicesFilePath)
-	mqttRun(mqttURL, mqttUser, mqttPassword)
+	initSynonyms(synonymsFilePath)
+	mqttRun(mqttURL, mqttUser, mqttPassword, mqttClientID)
 	prometheusRun(prometheusURL, prometheusPath)
 }

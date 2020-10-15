@@ -1,48 +1,89 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type metricType struct {
-	name        string
-	value       string
-	labels      []string
-	labelValues []string
+	name   string
+	value  string
+	labels map[string]string
 }
 
-var gaugeVecMap = map[string]*prometheus.GaugeVec{}
+type gauge struct {
+	gaugeVec *prometheus.GaugeVec
+	labels   []string
+}
 
-func getGaugeVec(name string, labelNames []string) *prometheus.GaugeVec {
+var gaugeVecMap = map[string]gauge{}
+
+func testSliceOfStrings(a, b []string) {}
+
+func getGaugeVec(name string, labelNames []string) (*gauge, error) {
 	// TODO => check if the labels are the same
 	if gaugeVec, found := gaugeVecMap[name]; found {
-		return gaugeVec
+		a := gaugeVec.labels
+		b := labelNames
+		sort.Strings(a)
+		sort.Strings(b)
+		if strings.Join(a, ":") != strings.Join(b, ":") {
+			return nil, fmt.Errorf("Same gauge name, different labels : %s => [%s] != [%s]", name, a, b)
+		}
+		return &gaugeVec, nil
 	}
-	gaugeVec := prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Name: name,
-	}, labelNames)
-	gaugeVecMap[name] = gaugeVec
-	err := prometheus.Register(gaugeVec)
+	gauge := gauge{
+		labels: labelNames,
+		gaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Name: name,
+		}, labelNames),
+	}
+
+	gaugeVecMap[name] = gauge
+	err := prometheus.Register(gauge.gaugeVec)
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
-	return gaugeVec
+	return &gauge, nil
 }
 
 func exposeMetrics(metrics []metricType) {
 	for _, metric := range metrics {
-		gauge := getGaugeVec(metric.name, metric.labels)
+		labels := make([]string, 0, len(metric.labels))
+		for k := range metric.labels {
+			labels = append(labels, k)
+		}
+		gauge, err := getGaugeVec(metric.name, labels)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
 		value, err := strconv.ParseFloat(metric.value, 64)
 		if err != nil {
 			log.Println(err)
 			continue
 		}
-		gauge.WithLabelValues(metric.labelValues...).Set(value)
+		labelValues := make([]string, 0, len(gauge.labels))
+		for _, label := range gauge.labels {
+			labelValues = append(labelValues, metric.labels[label])
+		}
+		log.Printf("[%s]:[%s]\n", labels, labelValues)
+		gauge.gaugeVec.WithLabelValues(labelValues...).Set(value)
+		gaugeTimestamp, err := getGaugeVec(metric.name+"_last_seconds", labels)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		now := time.Now()
+		gaugeTimestamp.gaugeVec.WithLabelValues(labelValues...).Set((time.Duration(now.UnixNano()).Seconds()))
 	}
 }
 

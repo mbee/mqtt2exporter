@@ -35,7 +35,7 @@ type Metric struct {
 
 // Message decypher one or several mqtt messages
 type Message struct {
-	Name            string   `yaml:"name"`
+	Type            string   `yaml:"type"`
 	MessageType     string   `yaml:"message_type"`
 	TopicRe         string   `yaml:"topic_re"`
 	Topic           string   `yaml:"topic"`
@@ -55,7 +55,7 @@ func getYamlFiles() *YamlFiles {
 	return yamlFiles
 }
 
-func addYaml(content []byte) {
+func readMessageFile(content []byte) {
 	err := yaml.Unmarshal(content, getYamlFiles())
 	if err != nil {
 		panic(err)
@@ -67,7 +67,7 @@ func addYaml(content []byte) {
 		}
 		message.topicCompiledRe, err = regexp.Compile(message.TopicRe)
 		if err != nil {
-			log.Printf("Unable to parse regexp '%s' for message '%s'", message.TopicRe, message.Name)
+			log.Printf("Unable to parse regexp '%s' for message '%s'", message.TopicRe, message.Type)
 			continue
 		}
 		mqttPerRegexps[message.topicCompiledRe] = message
@@ -88,7 +88,7 @@ func initMessages(devicesFilePath string) {
 			return nil
 		}
 		log.Printf("Reading %s\n", path)
-		addYaml(content)
+		readMessageFile(content)
 		return nil
 	})
 	if err != nil {
@@ -141,10 +141,9 @@ func getMetricsPerExactName(mqttTopic string, mqttMessage string) []metricType {
 	for topic, message := range mqttPerName {
 		if topic == mqttTopic {
 			result = append(result, metricType{
-				name:        message.MetricName,
-				value:       mqttMessage,
-				labels:      []string{"device_name"},
-				labelValues: []string{message.Name},
+				name:   message.MetricName,
+				value:  mqttMessage,
+				labels: map[string]string{"device_type": message.Type},
 			})
 			return result
 		}
@@ -178,17 +177,14 @@ func getMetricsPerRegexp(mqttTopic string, mqttMessage string) []metricType {
 					continue
 				}
 			}
-			labels := []string{"device_name"}
-			labelValues := []string{message.Name}
+			labels := map[string]string{"device_type": message.Type}
 			for _, label := range metric.Labels {
-				labels = append(labels, replace(label.Name, replacement))
-				labelValues = append(labelValues, replace(label.Value, replacement))
+				labels[replace(label.Name, replacement)] = replace(label.Value, replacement)
 			}
 			result = append(result, metricType{
-				name:        name,
-				value:       value,
-				labels:      labels,
-				labelValues: labelValues,
+				name:   name,
+				value:  value,
+				labels: labels,
 			})
 		}
 	}
