@@ -1,10 +1,16 @@
 synonyms:
-  - device_id: 58EB2D
-    device_type: zigbee2mqtt
-    device_name: kitchen
-  - device_id: 0x00158d000238927c
-    device_type: shelly_ht
-    device_name: livingroom
-  - device_id: 0x279621
-    device_type: somfy
-    device_name: livingroom east
+  - device_type: shelly-ht
+    device_id: "58EB2D"
+    device_name: Bedroom parents
+  - device_type: shelly-ht
+    device_id: "58F1AD"
+    device_name: Living room
+  - device_type: zigbee2mqtt
+    device_id: "0x00158d000238927c"
+    device_name: Outside
+  - device_type: zigbee2mqtt
+    device_id: "0x00158d00010d5d6f"
+    device_name: Bedroom parents
+  - device_type: zigbee2mqtt
+    device_id: "0x00158d0004022cee"
+    device_name: Entrance

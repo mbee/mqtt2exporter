@@ -40,6 +40,7 @@ func getGaugeVec(name string, labelNames []string) (*gauge, error) {
 		}
 		return &gaugeVec, nil
 	}
+	log.Printf("creating new gauge for %s [%s]\n", name, labelNames)
 	gauge := gauge{
 		labels: labelNames,
 		gaugeVec: prometheus.NewGaugeVec(prometheus.GaugeOpts{
@@ -75,7 +76,6 @@ func exposeMetrics(metrics []metricType) {
 		for _, label := range gauge.labels {
 			labelValues = append(labelValues, metric.labels[label])
 		}
-		log.Printf("[%s]:[%s]\n", labels, labelValues)
 		gauge.gaugeVec.WithLabelValues(labelValues...).Set(value)
 		gaugeTimestamp, err := getGaugeVec(metric.name+"_last_seconds", labels)
 		if err != nil {
