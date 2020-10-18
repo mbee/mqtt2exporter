@@ -1,4 +1,4 @@
-package main
+package lib
 
 import (
 	"fmt"
@@ -74,7 +74,7 @@ func readMessageFile(content []byte) {
 	}
 }
 
-func initMessages(devicesFilePath string) {
+func InitMessages(devicesFilePath string) {
 	err := filepath.Walk(devicesFilePath, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil

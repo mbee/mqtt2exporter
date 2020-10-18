@@ -8,8 +8,8 @@
       "name": "Launch",
       "type": "go",
       "request": "launch",
-      "mode": "auto",
-      "program": "${workspaceFolder}/src",
+      "mode": "debug",
+      "program": "${workspaceFolder}/mqtt2exporter.go",
       "envFile": "${workspaceFolder}/.env",
       "args": []
     }

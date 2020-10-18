@@ -1,4 +1,4 @@
-package main
+package lib
 
 import (
 	"io/ioutil"
@@ -41,7 +41,7 @@ func readSynonymFile(content []byte) {
 	}
 }
 
-func initSynonyms(synonymsFilePath string) {
+func InitSynonyms(synonymsFilePath string) {
 	err := filepath.Walk(synonymsFilePath, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil

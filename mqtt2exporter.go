@@ -1,6 +1,10 @@
 package main
 
-import "os"
+import (
+	"os"
+
+	"github.com/mbee/mqtt2exporter/lib"
+)
 
 func main() {
 	mqttURL := os.Getenv("MQTT_URL")
@@ -35,8 +39,8 @@ func main() {
 	if synonymsFilePath == "" {
 		synonymsFilePath = "static/synonyms/"
 	}
-	initMessages(devicesFilePath)
-	initSynonyms(synonymsFilePath)
-	mqttRun(mqttURL, mqttUser, mqttPassword, mqttClientID)
-	prometheusRun(prometheusURL, prometheusPath)
+	lib.InitMessages(devicesFilePath)
+	lib.InitSynonyms(synonymsFilePath)
+	lib.MqttRun(mqttURL, mqttUser, mqttPassword, mqttClientID)
+	lib.PrometheusRun(prometheusURL, prometheusPath)
 }
