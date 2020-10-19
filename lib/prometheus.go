@@ -52,7 +52,7 @@ func getGaugeVec(name string, labels map[string]string) (*prometheus.Gauge, erro
 		a := gaugeVecMap[name].labels
 		sort.Strings(a)
 		if strings.Join(a, ":") != strings.Join(labelNames, ":") {
-			return nil, fmt.Errorf("Same gauge name, different labels : %s => [%s] != [%s]", name, a, b)
+			return nil, fmt.Errorf("Same gauge name, different labels : %s => [%s] != [%s]", name, a, labelNames)
 		}
 	}
 	gaugeVec := gaugeVecMap[name].gaugeVec
