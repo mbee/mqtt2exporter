@@ -74,6 +74,7 @@ func readMessageFile(content []byte) {
 	}
 }
 
+// InitMessages will read the devices file
 func InitMessages(devicesFilePath string) {
 	err := filepath.Walk(devicesFilePath, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {

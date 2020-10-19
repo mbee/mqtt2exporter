@@ -41,6 +41,7 @@ func readSynonymFile(content []byte) {
 	}
 }
 
+// InitSynonyms reads the synonym files
 func InitSynonyms(synonymsFilePath string) {
 	err := filepath.Walk(synonymsFilePath, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {

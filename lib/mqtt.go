@@ -4,20 +4,10 @@ import (
 	"log"
 	"time"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/goiiot/libmqtt"
 )
 
-var f mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
-	log.Println(msg.Topic(), string(msg.Payload()))
-	metrics := getMetrics(msg.Topic(), string(msg.Payload()))
-	if len(metrics) == 0 {
-		return
-	}
-	addSynonyms(metrics)
-	exposeMetrics(metrics)
-}
-
+// MqttRun will run the mqtt listener
 func MqttRun(mqttURL, mqttUser, mqttPassword, mqttClientID string) {
 	client, err := libmqtt.NewClient(
 		libmqtt.WithKeepalive(10, 1.2),
@@ -41,7 +31,12 @@ func MqttRun(mqttURL, mqttUser, mqttPassword, mqttClientID string) {
 			}
 			log.Printf("Connected to %s with user %s", mqttURL, mqttUser)
 			client.HandleTopic(".*", func(client libmqtt.Client, topic string, qos libmqtt.QosLevel, msg []byte) {
-				log.Println(topic, string(msg))
+				metrics := getMetrics(topic, string(msg))
+				if len(metrics) == 0 {
+					return
+				}
+				addSynonyms(metrics)
+				exposeMetrics(metrics)
 			})
 		}),
 	)
