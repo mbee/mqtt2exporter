@@ -13,3 +13,6 @@
 # vendor/
 env.sh
 .env
+
+static/synonyms/one.yml
+static/synonyms/two.yml
