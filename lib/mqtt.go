@@ -14,6 +14,7 @@ func MqttRun(mqttURL, mqttUser, mqttPassword, mqttClientID string) {
 		libmqtt.WithAutoReconnect(true),
 		libmqtt.WithBackoffStrategy(time.Second, 5*time.Second, 1.2),
 		libmqtt.WithRouter(libmqtt.NewRegexRouter()),
+		libmqtt.WithCleanSession(true),
 	)
 	if err != nil {
 		panic("create mqtt client failed")
@@ -38,6 +39,9 @@ func MqttRun(mqttURL, mqttUser, mqttPassword, mqttClientID string) {
 				addSynonyms(metrics)
 				exposeMetrics(metrics)
 			})
+			client.Subscribe([]*libmqtt.Topic{
+				{Name: "#"},
+			}...)
 		}),
 	)
 }
