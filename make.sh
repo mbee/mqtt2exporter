@@ -9,7 +9,7 @@ rm -rf release/$VERSION
 
 echo build release/$VERSION/linux/arm
 mkdir -p release/$VERSION/linux/arm
-GOOS=linux GOARCH=arm GOARM=5 go build $NAME.go
+GOOS=linux GOARCH=arm GOARM=7 go build $NAME.go
 mv $NAME release/$VERSION/linux/arm
 
 echo build release/$VERSION/linux/amd64
