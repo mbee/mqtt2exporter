@@ -1,13 +1,11 @@
 package lib
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/savaki/jq"
@@ -29,7 +27,7 @@ type Label struct {
 type Metric struct {
 	Name   string  `yaml:"name"`
 	Value  string  `yaml:"value"`
-	Type   string  `yaml:"type"`
+	Count  bool    `yaml:"count"`
 	Labels []Label `yaml:"labels"`
 }
 
@@ -111,37 +109,24 @@ func replace(from string, replacement map[string]string) string {
 	return result
 }
 
-func getValueFromJSONMessage(json, jqpath, valueType string) (string, error) {
+func getValueFromJSONMessage(json, jqpath string) string {
 	op, err := jq.Parse(jqpath)
 	if err != nil {
-		return "", fmt.Errorf("unable to parse the jqpath <%s>: %v", jqpath, err)
+		return ""
 	}
 	value, err := op.Apply([]byte(json))
 	if err != nil {
-		return "", fmt.Errorf("unable to get the jq path <%s> from message <%s>: %v", jqpath, json, err)
+		return ""
 	}
-	if valueType == "" || valueType == "float64" {
-		_, err := strconv.ParseFloat(string(value), 64)
-		if err != nil {
-			return "", err
-		}
-		return string(value), nil
-	}
-	if valueType == "bool" {
-		if strings.ToLower(string(value)) == "true" {
-			return "1", nil
-		}
-		return "0", nil
-	}
-	return "", fmt.Errorf("unknown valueType %s", valueType)
+	return string(value)
 }
 
-func getMetricsPerExactName(mqttTopic string, mqttMessage string) []metricType {
-	result := []metricType{}
+func getMetricsPerExactName(mqttTopic string, mqttMessage string) []metricStruct {
+	result := []metricStruct{}
 	// let's take care of topic with no regexp first
 	for topic, message := range mqttPerName {
 		if topic == mqttTopic {
-			result = append(result, metricType{
+			result = append(result, metricStruct{
 				name:   message.MetricName,
 				value:  mqttMessage,
 				labels: map[string]string{"device_type": message.Type},
@@ -152,8 +137,8 @@ func getMetricsPerExactName(mqttTopic string, mqttMessage string) []metricType {
 	return result
 }
 
-func getMetricsPerRegexp(mqttTopic string, mqttMessage string) []metricType {
-	result := []metricType{}
+func getMetricsPerRegexp(mqttTopic string, mqttMessage string) []metricStruct {
+	result := []metricStruct{}
 	for re, message := range mqttPerRegexps {
 		match := re.FindStringSubmatch(mqttTopic)
 		if match == nil {
@@ -171,10 +156,8 @@ func getMetricsPerRegexp(mqttTopic string, mqttMessage string) []metricType {
 			name := replace(metric.Name, replacement)
 			value := mqttMessage
 			if message.MessageType == "json" {
-				var err error
-				value, err = getValueFromJSONMessage(mqttMessage, metric.Value, metric.Type)
-				if err != nil {
-					log.Println(err)
+				value = getValueFromJSONMessage(mqttMessage, metric.Value)
+				if value == "" {
 					continue
 				}
 			}
@@ -182,10 +165,15 @@ func getMetricsPerRegexp(mqttTopic string, mqttMessage string) []metricType {
 			for _, label := range metric.Labels {
 				labels[replace(label.Name, replacement)] = replace(label.Value, replacement)
 			}
-			result = append(result, metricType{
+			metricType := GAUGE
+			if metric.Count {
+				metricType = COUNTER
+			}
+			result = append(result, metricStruct{
 				name:   name,
 				value:  value,
 				labels: labels,
+				mType:  metricType,
 			})
 		}
 	}
@@ -196,7 +184,7 @@ func getMetricsPerRegexp(mqttTopic string, mqttMessage string) []metricType {
 // - topics from yaml files with no regexp
 // - topics from yaml files with regexp
 // If it founds a topic with no regexp, it does not look for topics with regexp.
-func getMetrics(mqttTopic string, mqttMessage string) []metricType {
+func getMetrics(mqttTopic string, mqttMessage string) []metricStruct {
 	// let's take care of topic with no regexp first
 	result := getMetricsPerExactName(mqttTopic, mqttMessage)
 	if len(result) != 0 {

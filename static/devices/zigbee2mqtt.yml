@@ -50,7 +50,44 @@ messages:
             value: "%device_id%"
       - name: m2e_contact
         value: ".contact"
-        type: bool
+        count: true
         labels:
           - name: device_id
             value: "%device_id%"
+      - name: m2e_angle_x
+        value: ".angle_x"
+        labels:
+          - name: device_id
+            value: "%device_id%"
+      - name: m2e_angle_y
+        value: ".angle_y"
+        labels:
+          - name: device_id
+            value: "%device_id%"
+      - name: m2e_angle_z
+        value: ".angle_z"
+        labels:
+          - name: device_id
+            value: "%device_id%"
+      - name: m2e_angle_x_absolute
+        value: ".angle_x_absolute"
+        labels:
+          - name: device_id
+            value: "%device_id%"
+      - name: m2e_angle_y_absolute
+        value: ".angle_y_absolute"
+        labels:
+          - name: device_id
+            value: "%device_id%"
+      - name: m2e_angle_z_absolute
+        value: ".angle_z_absolute"
+        labels:
+          - name: device_id
+            value: "%device_id%"
+      - name: m2e_action
+        value: ".action"
+        count: true
+        labels:
+          - name: device_id
+            value: "%device_id%"
+

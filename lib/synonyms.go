@@ -64,7 +64,7 @@ func InitSynonyms(synonymsFilePath string) {
 	}
 }
 
-func addSynonyms(metrics []metricType) {
+func addSynonyms(metrics []metricStruct) {
 	for _, metric := range metrics {
 		deviceID, okDeviceID := metric.labels["device_id"]
 		deviceType, okDeviceType := metric.labels["device_type"]

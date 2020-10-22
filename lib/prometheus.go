@@ -13,10 +13,18 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-type metricType struct {
+type metricType int
+
+const (
+	GAUGE metricType = iota
+	COUNTER
+)
+
+type metricStruct struct {
 	name   string
 	value  string
 	labels map[string]string
+	mType  metricType
 }
 
 type gauge struct {
@@ -24,13 +32,18 @@ type gauge struct {
 	labels   []string
 }
 
+type counter struct {
+	counterVec *prometheus.CounterVec
+	labels     []string
+}
+
 var gaugeVecMap = map[string]*gauge{}
+var counterVecMap = map[string]*counter{}
 var registry = prometheus.NewRegistry()
 
 func testSliceOfStrings(a, b []string) {}
 
 func getGaugeVec(name string, labels map[string]string) (*prometheus.Gauge, error) {
-	// TODO => check if the labels are the same
 	labelNames := make([]string, 0, len(labels))
 	for k := range labels {
 		labelNames = append(labelNames, k)
@@ -63,26 +76,78 @@ func getGaugeVec(name string, labels map[string]string) (*prometheus.Gauge, erro
 	return &g, nil
 }
 
-func exposeMetrics(metrics []metricType) {
+func getCounterVec(name string, labels map[string]string) (*prometheus.Counter, error) {
+	labelNames := make([]string, 0, len(labels))
+	for k := range labels {
+		labelNames = append(labelNames, k)
+	}
+	sort.Strings(labelNames)
+	if _, found := counterVecMap[name]; !found {
+		counter := counter{
+			labels: labelNames,
+			counterVec: prometheus.NewCounterVec(prometheus.CounterOpts{
+				Name: name,
+			}, labelNames),
+		}
+		err := registry.Register(counter.counterVec)
+		if err != nil {
+			return nil, err
+		}
+		counterVecMap[name] = &counter
+	} else {
+		a := counterVecMap[name].labels
+		sort.Strings(a)
+		if strings.Join(a, ":") != strings.Join(labelNames, ":") {
+			return nil, fmt.Errorf("Same counter name, different labels : %s => [%s] != [%s]", name, a, labelNames)
+		}
+	}
+	counterVec := counterVecMap[name].counterVec
+	c, err := counterVec.GetMetricWith(labels)
+	if err != nil {
+		return nil, err
+	}
+	return &c, nil
+}
+
+func exposeMetrics(metrics []metricStruct) {
 	for _, metric := range metrics {
-		value, err := strconv.ParseFloat(metric.value, 64)
-		if err != nil {
-			log.Println(err)
-			continue
+		if metric.mType == GAUGE {
+			value, err := strconv.ParseFloat(metric.value, 64)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			gauge, err := getGaugeVec(metric.name, metric.labels)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			(*gauge).Set(value)
+			gauge, err = getGaugeVec(metric.name+"_last_seconds", metric.labels)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			now := time.Now()
+			(*gauge).Set((time.Duration(now.UnixNano()).Seconds()))
 		}
-		gauge, err := getGaugeVec(metric.name, metric.labels)
-		if err != nil {
-			log.Println(err)
-			continue
+		if metric.mType == COUNTER {
+			labels := metric.labels
+			labels["value"] = strings.Trim(metric.value, "\"")
+			counter, err := getCounterVec(metric.name, metric.labels)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			(*counter).Inc()
+			gauge, err := getGaugeVec(metric.name+"_last_seconds", metric.labels)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			now := time.Now()
+			(*gauge).Set((time.Duration(now.UnixNano()).Seconds()))
 		}
-		(*gauge).Set(value)
-		gauge, err = getGaugeVec(metric.name+"_last_seconds", metric.labels)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		now := time.Now()
-		(*gauge).Set((time.Duration(now.UnixNano()).Seconds()))
 	}
 }
 

@@ -12,9 +12,28 @@
 
 messages:
   - type: shelly_ht
-    topic_re: shellies\/shellyht-(?P<device_id>\w+)\/sensor\/(?P<sensor>temperature|humidity|battery)
+    topic_re: shellies\/shellyht-(?P<device_id>\w+)\/sensor\/(?P<sensor>temperature|humidity|battery|error)
     metric:
       - name: "m2e_%sensor%"
         labels:
           - name: device_id
             value: "%device_id%"
+  - type: shelly_ht
+    topic_re: shellies\/shellyht-(?P<device_id>\w+)\/sensor\/act_reasons
+    message_type: json
+    metric:
+      - name: "m2e_act_reasons"
+        value: ".[0]"
+        count: true
+        labels:
+          - name: device_id
+            value: "%device_id%"
+  - type: shelly_ht
+    topic_re: shellies\/shellyht-(?P<device_id>\w+)\/online
+    metric:
+      - name: "m2e_online"
+        count: true
+        labels:
+          - name: device_id
+            value: "%device_id%"
+        
