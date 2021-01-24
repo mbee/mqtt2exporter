@@ -1,0 +1,55 @@
+# INPUT:
+#   teleinfo/trame {"ADCO":"031876072213 ", "OPTARIF":"BBR( ", "ISOUSC":"30 ", "BBRHCJB":"018314375 ", "BBRHPJB":"016347654 ", "BBRHCJW":"002535452 ", "BBRHPJW":"000933229 ", "BBRHCJR":"000118823 ", "BBRHPJR":"000210228 ", "PTEC":"HPJB ", "DEMAIN":"---- ", "IINST1":"006 ", "IINST2":"004 ", "IINST3":"006 ", "IMAX1":"060 ", "IMAX2":"060 ", "IMAX3":"060 ", "PMAX":"09894 ", "PAPP":"03610 ", "HHPHC":"A ", "MOTDETAT":"000000 "}
+# teleinfo/connected 1
+# teleinfo/timeout 10
+# OUTPUT:
+#   m2e_battery{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 32
+#   m2e_battery_last_seconds{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 1.6006711593525043e+09
+#   m2e_humidity{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 56.4
+#   m2e_humidity_last_seconds{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 1.6006711593525043e+09
+#   m2e_linkquality{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 68
+#   m2e_linkquality_last_seconds{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 1.6006711593525043e+09
+#   m2e_pressure{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 1005
+#   m2e_pressure_last_seconds{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 1.6006711593525043e+09
+#   m2e_temperature{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 24.3
+#   m2e_temperature_last_seconds{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 1.6006711593525043e+09
+#   m2e_voltage{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 2835
+#   m2e_voltage_last_seconds{device_id="0x00158d000238927c", device_type="zigbee2mqtt"} 1.6006711593525043e+09
+messages:
+  - type: teleinfo_wifi
+    topic_re: ^teleinfo\/trame$
+    message_type: json
+    metric:
+      - name: m2e_adco
+        value: ".ADCO"
+      - name: m2e_isousc
+        value: ".ISOUSC"
+      - name: m2e_bbrhcjb
+        value: ".BBRHCJB"
+      - name: m2e_bbrhpjb
+        value: ".BBRHPJB"
+      - name: m2e_bbrhcjw
+        value: ".BBRHCJW"
+      - name: m2e_bbrhpjw
+        value: ".BBRHPJW"
+      - name: m2e_bbrhcjr
+        value: ".BBRHCJR"
+      - name: m2e_bbrhpjr
+        value: ".BBRHPJR"
+      - name: m2e_iinst1
+        value: ".IINST1"
+      - name: m2e_iinst2
+        value: ".IINST2"
+      - name: m2e_iinst3
+        value: ".IINST3"
+      - name: m2e_imax1
+        value: ".IMAX1"
+      - name: m2e_imax2
+        value: ".IMAX2"
+      - name: m2e_imax3
+        value: ".IMAX3"
+      - name: m2e_pmax
+        value: ".PMAX"
+      - name: m2e_papp
+        value: ".PAPP"
+

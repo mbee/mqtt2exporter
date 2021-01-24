@@ -109,10 +109,14 @@ func getCounterVec(name string, labels map[string]string) (*prometheus.Counter, 
 	return &c, nil
 }
 
+func sanitizeValue(val string) string {
+	return strings.Trim(val, "\" \t")
+}
+
 func exposeMetrics(metrics []metricStruct) {
 	for _, metric := range metrics {
 		if metric.mType == GAUGE {
-			value, err := strconv.ParseFloat(metric.value, 64)
+			value, err := strconv.ParseFloat(sanitizeValue(metric.value), 64)
 			if err != nil {
 				log.Println(err)
 				continue
